@@ -3,266 +3,661 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pauta Offline PRO FINAL</title>
+<title>Pauta Digital Offline - Fallas Carros</title>
 
 <style>
-body { font-family: Arial; padding:10px; background:#f4f6f9; }
-h1 { background:#111827; color:white; padding:12px; text-align:center; }
-h2 { background:#1e3a8a; color:white; padding:8px; }
-.card { background:white; padding:10px; margin-bottom:10px; border-radius:6px; }
-input, textarea, select, button { width:100%; margin:5px 0; padding:8px; }
-button { background:#2563eb; color:white; border:none; font-weight:bold; }
-.estado { padding:8px; background:#e5e7eb; margin:5px 0; }
-canvas { border:2px solid #1e3a8a; width:100%; height:140px; }
-.itemPendiente { padding:5px; border-bottom:1px solid #ccc; font-size:14px; }
+body {
+    font-family: Arial, sans-serif;
+    margin: 10px;
+    background: #f4f6f9;
+}
+
+h1 {
+    background: #111827;
+    color: white;
+    padding: 14px;
+    text-align: center;
+    border-radius: 6px;
+}
+
+h2 {
+    background: #1e3a8a;
+    color: white;
+    padding: 10px;
+    margin-top: 18px;
+    border-radius: 6px;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 9px;
+    margin: 6px 0;
+    box-sizing: border-box;
+}
+
+textarea {
+    min-height: 65px;
+}
+
+label {
+    display: block;
+    margin: 8px 0;
+}
+
+button {
+    padding: 14px;
+    width: 100%;
+    margin-top: 12px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    font-size: 17px;
+    font-weight: bold;
+    border-radius: 6px;
+}
+
+button.secundario {
+    background: #374151;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.card {
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.estado {
+    padding: 10px;
+    margin: 8px 0;
+    background: #e5e7eb;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.itemPendiente {
+    padding: 8px;
+    border-bottom: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+.firmaCanvas {
+    width: 100%;
+    height: 160px;
+    border: 2px solid #1e3a8a;
+    background: white;
+    touch-action: none;
+    border-radius: 6px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>Pauta Digital Offline PRO</h1>
+<h1>Pauta Digital de Análisis de Fallas en Carros</h1>
 
 <div class="estado" id="estadoConexion"></div>
-<div class="estado" id="contadorPendientes"></div>
+<div class="estado" id="contadorPendientes">Pendientes: 0</div>
 
 <div class="card">
 <h2>Pautas Pendientes</h2>
-<div id="listaPendientes">No hay pendientes</div>
+<div id="listaPendientes">No hay pautas pendientes.</div>
 </div>
 
 <div class="card">
 <h2>Datos Generales</h2>
-<input id="carro" placeholder="Carro">
-<input id="ot" placeholder="OT">
+<input type="text" id="carro" placeholder="N° Carro / Contenedor">
+<input type="text" id="ot" placeholder="Orden de Trabajo OT">
 <input type="date" id="fechaInicio">
 <input type="date" id="fechaTermino">
 </div>
 
 <div class="card">
-<h2>Sistema</h2>
+<h2>Sistema Afectado</h2>
 <select id="sistema">
-<option value="">Seleccione</option>
-<option>Freno</option>
-<option>Enganche</option>
-<option>Rodado</option>
-<option>Estructura</option>
+    <option value="">Seleccione sistema</option>
+    <option value="Freno">Freno</option>
+    <option value="Enganche">Enganche</option>
+    <option value="Descarga">Descarga</option>
+    <option value="Rodado">Rodado</option>
+    <option value="Estructura">Estructura</option>
+    <option value="Carga">Carga</option>
+    <option value="Residuos">Residuos</option>
 </select>
 </div>
 
 <div class="card">
-<h2>Falla</h2>
-<input id="parte" placeholder="Parte">
-<textarea id="sintoma"></textarea>
+<h2>Falla Detectada</h2>
+<input type="text" id="parte" placeholder="Indique parte afectada">
+<input type="text" id="sintoma" placeholder="Indique síntoma detectado">
 </div>
 
 <div class="card">
-<h2>5 Porqués</h2>
-<textarea id="p1"></textarea>
-<textarea id="p2"></textarea>
-<textarea id="p3"></textarea>
-<textarea id="p4"></textarea>
-<textarea id="p5"></textarea>
+<h2>Análisis de Falla - 5 Porqués</h2>
+<textarea id="p1" placeholder="¿Por qué ocurrió la falla?"></textarea>
+<textarea id="p2" placeholder="¿Por qué ocurrió lo anterior?"></textarea>
+<textarea id="p3" placeholder="¿Por qué ocurrió lo anterior?"></textarea>
+<textarea id="p4" placeholder="¿Por qué ocurrió lo anterior? Opcional"></textarea>
+<textarea id="p5" placeholder="Causa raíz final. Opcional"></textarea>
 </div>
 
 <div class="card">
-<h2>Causa</h2>
-<label><input type="checkbox" value="Mano de Obra"> Mano de Obra</label><br>
-<label><input type="checkbox" value="Método"> Método</label><br>
-<label><input type="checkbox" value="Material"> Material</label><br>
-<label><input type="checkbox" value="Equipo"> Equipo</label>
+<h2>Clasificación de Causa - 6M</h2>
+<label><input type="checkbox" value="Mano de Obra"> Mano de Obra</label>
+<label><input type="checkbox" value="Método"> Método</label>
+<label><input type="checkbox" value="Material"> Material</label>
+<label><input type="checkbox" value="Maquinaria / Equipo"> Maquinaria / Equipo</label>
+<label><input type="checkbox" value="Medio Ambiente"> Medio Ambiente</label>
+<label><input type="checkbox" value="Operación"> Operación</label>
 </div>
 
 <div class="card">
-<h2>Acción</h2>
-<textarea id="accion"></textarea>
+<h2>Justificación de la Causa</h2>
+<textarea id="justificacion" placeholder="Explique por qué se determina esta causa raíz"></textarea>
 </div>
 
 <div class="card">
-<h2>Responsable</h2>
-<input id="colaborador" placeholder="Nombre">
-<canvas id="firma"></canvas>
+<h2>Acción Correctiva</h2>
+<textarea id="accion" placeholder="Describa la acción correctiva realizada o propuesta"></textarea>
 </div>
 
 <div class="card">
-<input type="file" id="foto" multiple>
+<h2>Responsables</h2>
+<input type="text" id="colaborador" placeholder="Nombre colaborador">
+
+<label>Firma Colaborador</label>
+<canvas id="firmaColaborador" class="firmaCanvas"></canvas>
+<button type="button" class="secundario" onclick="limpiarFirma()">Limpiar firma colaborador</button>
+
+<input type="text" id="supervisor" placeholder="Nombre supervisor / revisor">
 </div>
 
-<button onclick="guardarOEnviar()">Guardar / Enviar</button>
-<button onclick="sincronizar()">Sincronizar</button>
+<div class="card">
+<h2>Observaciones</h2>
+<textarea id="observaciones" placeholder="Observaciones adicionales. Opcional"></textarea>
+</div>
+
+<div class="card">
+<h2>Fotos / Evidencias</h2>
+<input type="file" id="foto" multiple accept="image/*">
+<small>Máximo 2 fotos, 6 MB por foto. Se recomienda adjuntar al menos 1 evidencia.</small>
+</div>
+
+<button type="button" onclick="guardarOEnviar()">Guardar / Enviar Pauta</button>
+<button type="button" onclick="sincronizar()">Sincronizar Pendientes</button>
+<button type="button" class="secundario" onclick="actualizarListaPendientes()">Actualizar Lista Pendientes</button>
 
 <script>
-
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzCP2skB2HFyNDrGu_CYbBN1KLQK8nuBDbIj7n8kp4I0qrkmjzYrHN6riyAon7BOTkTtQ/exec";
 
-const DB_NAME = "DB";
-const STORE = "pendientes";
+const DB_NAME = "PautasOfflineDB_Final";
+const STORE_NAME = "pendientes";
 
-let db;
-let firmaHecha = false;
+let db = null;
+let firmaColaboradorRealizada = false;
+let sincronizando = false;
 
-// ================= ESTADO =================
-function estado() {
-    estadoConexion.innerText = navigator.onLine ? "🟢 Online" : "🔴 Offline";
+function actualizarEstadoConexion() {
+    document.getElementById("estadoConexion").innerText =
+        navigator.onLine ? "🟢 Con conexión" : "🔴 Sin conexión";
 }
-window.addEventListener("online", () => { estado(); sincronizar(); });
-window.addEventListener("offline", estado);
-estado();
 
-// ================= DB =================
+window.addEventListener("online", async function() {
+    actualizarEstadoConexion();
+    await sincronizar();
+});
+
+window.addEventListener("offline", actualizarEstadoConexion);
+
 function abrirDB() {
-    return new Promise((res, rej) => {
-        const req = indexedDB.open(DB_NAME, 1);
-        req.onupgradeneeded = e => {
-            db = e.target.result;
-            db.createObjectStore(STORE, { keyPath:"id", autoIncrement:true });
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+
+        request.onupgradeneeded = function(event) {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, {
+                    keyPath: "id",
+                    autoIncrement: true
+                });
+            }
         };
-        req.onsuccess = e => { db = e.target.result; res(); };
+
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            resolve(db);
+        };
+
+        request.onerror = function() {
+            reject("Error al abrir IndexedDB");
+        };
     });
 }
 
-// ================= FIRMA =================
-function prepararFirma() {
-    const canvas = firma;
-    const ctx = canvas.getContext("2d");
-    canvas.width = canvas.offsetWidth;
-    canvas.height = 140;
-
-    let dib = false;
-
-    canvas.onmousedown = () => dib = true;
-    canvas.onmouseup = () => dib = false;
-
-    canvas.onmousemove = e => {
-        if (!dib) return;
-        ctx.lineTo(e.offsetX, e.offsetY);
-        ctx.stroke();
-        firmaHecha = true;
-    };
+function obtenerCausas6M() {
+    let causas = [];
+    document.querySelectorAll('input[type="checkbox"]:checked').forEach(function(el) {
+        causas.push(el.value);
+    });
+    return causas.join(", ");
 }
-window.onload = prepararFirma;
 
-// ================= VALIDACION =================
-function validar() {
-    if (!carro.value || !ot.value || !sintoma.value) return alert("Faltan datos"), false;
-    if (!firmaHecha) return alert("Debe firmar"), false;
+function prepararFirma() {
+    const canvas = document.getElementById("firmaColaborador");
+    const ctx = canvas.getContext("2d");
+
+    function ajustarCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = 160;
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#000000";
+    }
+
+    ajustarCanvas();
+
+    let dibujando = false;
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const punto = e.touches ? e.touches[0] : e;
+        return {
+            x: punto.clientX - rect.left,
+            y: punto.clientY - rect.top
+        };
+    }
+
+    function iniciar(e) {
+        e.preventDefault();
+        dibujando = true;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    }
+
+    function dibujar(e) {
+        if (!dibujando) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        firmaColaboradorRealizada = true;
+    }
+
+    function terminar(e) {
+        if (e) e.preventDefault();
+        dibujando = false;
+    }
+
+    canvas.addEventListener("mousedown", iniciar);
+    canvas.addEventListener("mousemove", dibujar);
+    canvas.addEventListener("mouseup", terminar);
+    canvas.addEventListener("mouseleave", terminar);
+
+    canvas.addEventListener("touchstart", iniciar, { passive: false });
+    canvas.addEventListener("touchmove", dibujar, { passive: false });
+    canvas.addEventListener("touchend", terminar, { passive: false });
+}
+
+function limpiarFirma() {
+    const canvas = document.getElementById("firmaColaborador");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    firmaColaboradorRealizada = false;
+}
+
+function validarFormulario() {
+    if (!document.getElementById("carro").value.trim()) {
+        alert("Debe ingresar el N° de Carro");
+        return false;
+    }
+
+    if (!document.getElementById("ot").value.trim()) {
+        alert("Debe ingresar la OT");
+        return false;
+    }
+
+    if (!document.getElementById("fechaInicio").value) {
+        alert("Debe ingresar la fecha de inicio");
+        return false;
+    }
+
+    if (!document.getElementById("fechaTermino").value) {
+        alert("Debe ingresar la fecha de término");
+        return false;
+    }
+
+    if (!document.getElementById("sistema").value) {
+        alert("Debe seleccionar un sistema");
+        return false;
+    }
+
+    if (!document.getElementById("parte").value.trim()) {
+        alert("Debe ingresar la parte afectada");
+        return false;
+    }
+
+    if (!document.getElementById("sintoma").value.trim()) {
+        alert("Debe ingresar el síntoma");
+        return false;
+    }
+
+    if (!document.getElementById("p1").value.trim()) {
+        alert("Debe ingresar ¿Por qué 1?");
+        return false;
+    }
+
+    if (!document.getElementById("p2").value.trim()) {
+        alert("Debe ingresar ¿Por qué 2?");
+        return false;
+    }
+
+    if (!document.getElementById("p3").value.trim()) {
+        alert("Debe ingresar ¿Por qué 3?");
+        return false;
+    }
+
+    if (!obtenerCausas6M()) {
+        alert("Debe seleccionar al menos una causa 6M");
+        return false;
+    }
+
+    if (!document.getElementById("justificacion").value.trim()) {
+        alert("Debe ingresar la justificación de la causa");
+        return false;
+    }
+
+    if (!document.getElementById("accion").value.trim()) {
+        alert("Debe ingresar la acción correctiva");
+        return false;
+    }
+
+    if (!document.getElementById("colaborador").value.trim()) {
+        alert("Debe ingresar el nombre del colaborador");
+        return false;
+    }
+
+    if (!firmaColaboradorRealizada) {
+        alert("Debe ingresar la firma del colaborador");
+        return false;
+    }
+
+    if (!document.getElementById("supervisor").value.trim()) {
+        alert("Debe ingresar el nombre del supervisor / revisor");
+        return false;
+    }
+
+    if (document.getElementById("foto").files.length === 0) {
+        alert("Debe adjuntar al menos una foto o evidencia");
+        return false;
+    }
+
     return true;
 }
 
-// ================= BASE64 =================
-function base64(file) {
-    return new Promise(r => {
-        const rd = new FileReader();
-        rd.onload = () => r(rd.result.split(",")[1]);
-        rd.readAsDataURL(file);
+function convertirBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            resolve(e.target.result.split(",")[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
     });
 }
 
-// ================= GUARDAR OFFLINE =================
-async function guardarOffline(data) {
-    await abrirDB();
-    db.transaction(STORE,"readwrite").objectStore(STORE).add(data);
-    actualizarLista();
-}
+async function construirDataFormulario() {
+    const archivos = document.getElementById("foto").files;
 
-// ================= ENVIAR =================
-async function enviar(data) {
-    const r = await fetch(URL_SCRIPT, { method:"POST", body:JSON.stringify(data) });
-    const t = await r.text();
-    return t.includes("OK");
-}
+    if (archivos.length > 2) {
+        alert("Solo puedes subir máximo 2 fotos.");
+        return null;
+    }
 
-// ================= LOGICA PRINCIPAL =================
-async function guardarOEnviar() {
-
-    if (!validar()) return;
+    for (let i = 0; i < archivos.length; i++) {
+        if (archivos[i].size > 6000000) {
+            alert("La foto " + archivos[i].name + " pesa más de 6 MB. Debe comprimirse antes de enviar.");
+            return null;
+        }
+    }
 
     let fotos = [];
-    for (let f of foto.files) {
-        fotos.push({ nombre:f.name, tipo:f.type, base64:await base64(f) });
+
+    for (let file of archivos) {
+        const base64 = await convertirBase64(file);
+        fotos.push({
+            nombre: file.name,
+            tipo: file.type,
+            base64: base64
+        });
     }
 
-    const data = {
-        idLocal: Date.now()+"_"+Math.random(),
-        carro: carro.value,
-        ot: ot.value,
-        sintoma: sintoma.value,
-        p1: p1.value,
-        p2: p2.value,
-        p3: p3.value,
-        accion: accion.value,
-        colaborador: colaborador.value,
-        firmaColaborador: firma.toDataURL(),
-        fotos: fotos
+    return {
+        idLocal: Date.now() + "_" + Math.random().toString(36).slice(2),
+        fechaLocal: new Date().toISOString(),
+        carro: document.getElementById("carro").value.trim(),
+        ot: document.getElementById("ot").value.trim(),
+        fechaInicio: document.getElementById("fechaInicio").value,
+        fechaTermino: document.getElementById("fechaTermino").value,
+        sistema: document.getElementById("sistema").value,
+        parte: document.getElementById("parte").value.trim(),
+        sintoma: document.getElementById("sintoma").value.trim(),
+        p1: document.getElementById("p1").value.trim(),
+        p2: document.getElementById("p2").value.trim(),
+        p3: document.getElementById("p3").value.trim(),
+        p4: document.getElementById("p4").value.trim(),
+        p5: document.getElementById("p5").value.trim(),
+        causas6m: obtenerCausas6M(),
+        justificacion: document.getElementById("justificacion").value.trim(),
+        accion: document.getElementById("accion").value.trim(),
+        colaborador: document.getElementById("colaborador").value.trim(),
+        supervisor: document.getElementById("supervisor").value.trim(),
+        firmaColaborador: document.getElementById("firmaColaborador").toDataURL("image/png"),
+        observaciones: document.getElementById("observaciones").value.trim(),
+        fotos: fotos,
+        estado: "PENDIENTE"
     };
-
-    if (navigator.onLine) {
-        const ok = await enviar(data);
-        if (ok) {
-            alert("Enviado");
-            limpiar();
-            return;
-        }
-    }
-
-    await guardarOffline(data);
-    alert("Guardado offline");
 }
 
-// ================= SINCRONIZAR =================
-async function sincronizar() {
+async function guardarPendiente(data) {
     await abrirDB();
 
-    const tx = db.transaction(STORE,"readonly");
-    const datos = await new Promise(res => {
-        tx.objectStore(STORE).getAll().onsuccess = e => res(e.target.result);
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        const store = tx.objectStore(STORE_NAME);
+        store.add(data);
+
+        tx.oncomplete = function() {
+            resolve();
+        };
+
+        tx.onerror = function() {
+            reject("Error al guardar pauta pendiente");
+        };
     });
-
-    for (let d of datos) {
-        const ok = await enviar(d);
-        if (ok) {
-            db.transaction(STORE,"readwrite").objectStore(STORE).delete(d.id);
-        }
-    }
-
-    actualizarLista();
 }
 
-// ================= LISTA =================
-async function actualizarLista() {
+async function obtenerPendientes() {
     await abrirDB();
 
-    const tx = db.transaction(STORE,"readonly");
-    const datos = await new Promise(res => {
-        tx.objectStore(STORE).getAll().onsuccess = e => res(e.target.result);
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readonly");
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.getAll();
+
+        request.onsuccess = function() {
+            resolve(request.result);
+        };
+
+        request.onerror = function() {
+            reject("Error al obtener pendientes");
+        };
+    });
+}
+
+async function eliminarPendiente(id) {
+    await abrirDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.delete(id);
+
+        request.onsuccess = function() {
+            resolve();
+        };
+
+        request.onerror = function() {
+            reject("Error al eliminar pendiente");
+        };
+    });
+}
+
+async function enviarAlServidor(data) {
+    const respuesta = await fetch(URL_SCRIPT, {
+        method: "POST",
+        body: JSON.stringify(data)
     });
 
-    contadorPendientes.innerText = "Pendientes: " + datos.length;
+    const texto = await respuesta.text();
+    console.log("Respuesta Apps Script:", texto);
 
-    listaPendientes.innerHTML = "";
+    return texto.includes("OK");
+}
 
-    if (datos.length === 0) {
-        listaPendientes.innerHTML = "No hay pendientes";
+async function guardarOEnviar() {
+    if (!validarFormulario()) {
         return;
     }
 
-    datos.forEach(d => {
-        listaPendientes.innerHTML += `
-        <div class="itemPendiente">
-        Carro: ${d.carro} | OT: ${d.ot}
-        </div>`;
+    const data = await construirDataFormulario();
+    if (!data) return;
+
+    if (navigator.onLine) {
+        try {
+            const ok = await enviarAlServidor(data);
+            if (ok) {
+                alert("Pauta enviada correctamente");
+                limpiarFormulario();
+                await actualizarListaPendientes();
+                return;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    await guardarPendiente(data);
+    alert("Pauta guardada como pendiente en este dispositivo");
+    limpiarFormulario();
+    await actualizarListaPendientes();
+}
+
+async function sincronizar() {
+    if (sincronizando) {
+        console.log("Sincronización ya en curso. Se evita duplicado.");
+        return;
+    }
+
+    if (!navigator.onLine) {
+        return;
+    }
+
+    sincronizando = true;
+
+    try {
+        const pendientes = await obtenerPendientes();
+
+        for (const pauta of pendientes) {
+            const ok = await enviarAlServidor(pauta);
+
+            if (ok) {
+                await eliminarPendiente(pauta.id);
+            } else {
+                alert("No se pudo sincronizar una pauta pendiente. Se mantiene en lista.");
+                break;
+            }
+        }
+
+        await actualizarListaPendientes();
+
+        if (pendientes.length > 0) {
+            alert("Sincronización finalizada");
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert("Error durante la sincronización");
+    } finally {
+        sincronizando = false;
+    }
+}
+
+async function actualizarListaPendientes() {
+    const pendientes = await obtenerPendientes();
+
+    document.getElementById("contadorPendientes").innerText =
+        "📌 Pautas pendientes en este dispositivo: " + pendientes.length;
+
+    const lista = document.getElementById("listaPendientes");
+    lista.innerHTML = "";
+
+    if (pendientes.length === 0) {
+        lista.innerHTML = "No hay pautas pendientes.";
+        return;
+    }
+
+    pendientes.forEach(function(p) {
+        const div = document.createElement("div");
+        div.className = "itemPendiente";
+        div.innerHTML =
+            "<b>Carro:</b> " + (p.carro || "") +
+            " | <b>OT:</b> " + (p.ot || "") +
+            " | <b>Sistema:</b> " + (p.sistema || "") +
+            "<br><small>ID local: " + (p.idLocal || "") + "</small>";
+        lista.appendChild(div);
     });
 }
 
-// ================= LIMPIAR =================
-function limpiar() {
-    document.querySelectorAll("input,textarea").forEach(e => e.value="");
-    firma.getContext("2d").clearRect(0,0,firma.width,firma.height);
-    firmaHecha = false;
+function limpiarFormulario() {
+    document.getElementById("carro").value = "";
+    document.getElementById("ot").value = "";
+    document.getElementById("fechaInicio").value = "";
+    document.getElementById("fechaTermino").value = "";
+    document.getElementById("sistema").value = "";
+    document.getElementById("parte").value = "";
+    document.getElementById("sintoma").value = "";
+    document.getElementById("p1").value = "";
+    document.getElementById("p2").value = "";
+    document.getElementById("p3").value = "";
+    document.getElementById("p4").value = "";
+    document.getElementById("p5").value = "";
+    document.getElementById("justificacion").value = "";
+    document.getElementById("accion").value = "";
+    document.getElementById("colaborador").value = "";
+    document.getElementById("supervisor").value = "";
+    document.getElementById("observaciones").value = "";
+    document.getElementById("foto").value = "";
+
+    document.querySelectorAll('input[type="checkbox"]').forEach(function(el) {
+        el.checked = false;
+    });
+
+    limpiarFirma();
 }
 
-// INIT
-abrirDB().then(actualizarLista);
-
+window.addEventListener("load", async function() {
+    actualizarEstadoConexion();
+    prepararFirma();
+    await abrirDB();
+    await actualizarListaPendientes();
+});
 </script>
 
 </body>
