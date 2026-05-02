@@ -1,1 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Pauta Offline</title>
+
+<style>
+body { font-family: Arial; padding: 10px; background:#f4f6f9; }
+input, textarea, button { width:100%; margin:5px 0; padding:8px; }
+
+button { background:#2563eb; color:white; border:none; }
+
+.estado { padding:10px; margin:10px 0; background:#e5e7eb; }
+</style>
+</head>
+
+<body>
+
+<h2>Pauta Offline</h2>
+
+<div class="estado" id="estadoConexion"></div>
+
+<input id="carro" placeholder="Carro">
+<input id="ot" placeholder="OT">
+
+<textarea id="sintoma" placeholder="Síntoma"></textarea>
+
+<button onclick="guardarOffline()">Guardar Offline</button>
+<button onclick="sincronizar()">Sincronizar Pendientes</button>
+
+<script>
+
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzCP2skB2HFyNDrGu_CYbBN1KLQK8nuBDbIj7n8kp4I0qrkmjzYrHN6riyAon7BOTkTtQ/exec";
+
+function actualizarEstado() {
+    document.getElementById("estadoConexion").innerText =
+        navigator.onLine ? "🟢 Con conexión" : "🔴 Sin conexión";
+}
+
+window.addEventListener("online", actualizarEstado);
+window.addEventListener("offline", actualizarEstado);
+actualizarEstado();
+
+function guardarOffline() {
+
+    const data = {
+        carro: document.getElementById("carro").value,
+        ot: document.getElementById("ot").value,
+        sintoma: document.getElementById("sintoma").value
+    };
+
+    let pendientes = JSON.parse(localStorage.getItem("pendientes") || "[]");
+
+    pendientes.push(data);
+
+    localStorage.setItem("pendientes", JSON.stringify(pendientes));
+
+    alert("Pauta guardada offline");
+
+}
+
+async function sincronizar() {
+
+    if (!navigator.onLine) {
+        alert("No hay internet");
+        return;
+    }
+
+    let pendientes = JSON.parse(localStorage.getItem("pendientes") || "[]");
+
+    if (pendientes.length === 0) {
+        alert("No hay pendientes");
+        return;
+    }
+
+    for (let p of pendientes) {
+
+        await fetch(URL_SCRIPT, {
+            method: "POST",
+            body: JSON.stringify(p)
+        });
+
+    }
+
+    localStorage.removeItem("pendientes");
+
+    alert("Sincronización completa");
+
+}
+
+</script>
+
+</body>
+</html>
