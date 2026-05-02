@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pauta Offline PRO</title>
+<title>Pauta Offline PRO FINAL</title>
 
 <style>
 body { font-family: Arial; padding:10px; background:#f4f6f9; }
@@ -14,18 +14,24 @@ input, textarea, select, button { width:100%; margin:5px 0; padding:8px; }
 button { background:#2563eb; color:white; border:none; font-weight:bold; }
 .estado { padding:8px; background:#e5e7eb; margin:5px 0; }
 canvas { border:2px solid #1e3a8a; width:100%; height:140px; }
+.itemPendiente { padding:5px; border-bottom:1px solid #ccc; font-size:14px; }
 </style>
 </head>
 
 <body>
 
-<h1>Pauta Offline PRO</h1>
+<h1>Pauta Digital Offline PRO</h1>
 
 <div class="estado" id="estadoConexion"></div>
 <div class="estado" id="contadorPendientes"></div>
 
 <div class="card">
-<h2>Datos</h2>
+<h2>Pautas Pendientes</h2>
+<div id="listaPendientes">No hay pendientes</div>
+</div>
+
+<div class="card">
+<h2>Datos Generales</h2>
 <input id="carro" placeholder="Carro">
 <input id="ot" placeholder="OT">
 <input type="date" id="fechaInicio">
@@ -33,9 +39,20 @@ canvas { border:2px solid #1e3a8a; width:100%; height:140px; }
 </div>
 
 <div class="card">
+<h2>Sistema</h2>
+<select id="sistema">
+<option value="">Seleccione</option>
+<option>Freno</option>
+<option>Enganche</option>
+<option>Rodado</option>
+<option>Estructura</option>
+</select>
+</div>
+
+<div class="card">
 <h2>Falla</h2>
 <input id="parte" placeholder="Parte">
-<textarea id="sintoma" placeholder="Síntoma"></textarea>
+<textarea id="sintoma"></textarea>
 </div>
 
 <div class="card">
@@ -43,6 +60,16 @@ canvas { border:2px solid #1e3a8a; width:100%; height:140px; }
 <textarea id="p1"></textarea>
 <textarea id="p2"></textarea>
 <textarea id="p3"></textarea>
+<textarea id="p4"></textarea>
+<textarea id="p5"></textarea>
+</div>
+
+<div class="card">
+<h2>Causa</h2>
+<label><input type="checkbox" value="Mano de Obra"> Mano de Obra</label><br>
+<label><input type="checkbox" value="Método"> Método</label><br>
+<label><input type="checkbox" value="Material"> Material</label><br>
+<label><input type="checkbox" value="Equipo"> Equipo</label>
 </div>
 
 <div class="card">
@@ -64,39 +91,39 @@ canvas { border:2px solid #1e3a8a; width:100%; height:140px; }
 <button onclick="sincronizar()">Sincronizar</button>
 
 <script>
+
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzCP2skB2HFyNDrGu_CYbBN1KLQK8nuBDbIj7n8kp4I0qrkmjzYrHN6riyAon7BOTkTtQ/exec";
+
 const DB_NAME = "DB";
 const STORE = "pendientes";
 
 let db;
 let firmaHecha = false;
 
+// ================= ESTADO =================
 function estado() {
-    document.getElementById("estadoConexion").innerText =
-        navigator.onLine ? "🟢 Online" : "🔴 Offline";
+    estadoConexion.innerText = navigator.onLine ? "🟢 Online" : "🔴 Offline";
 }
-window.addEventListener("online", estado);
+window.addEventListener("online", () => { estado(); sincronizar(); });
 window.addEventListener("offline", estado);
 estado();
 
+// ================= DB =================
 function abrirDB() {
     return new Promise((res, rej) => {
         const req = indexedDB.open(DB_NAME, 1);
-
         req.onupgradeneeded = e => {
             db = e.target.result;
             db.createObjectStore(STORE, { keyPath:"id", autoIncrement:true });
         };
-
         req.onsuccess = e => { db = e.target.result; res(); };
-        req.onerror = () => rej();
     });
 }
 
+// ================= FIRMA =================
 function prepararFirma() {
-    const canvas = document.getElementById("firma");
+    const canvas = firma;
     const ctx = canvas.getContext("2d");
-
     canvas.width = canvas.offsetWidth;
     canvas.height = 140;
 
@@ -114,18 +141,14 @@ function prepararFirma() {
 }
 window.onload = prepararFirma;
 
+// ================= VALIDACION =================
 function validar() {
-    if (!carro.value || !ot.value || !sintoma.value || !p1.value || !p2.value || !p3.value) {
-        alert("Faltan datos");
-        return false;
-    }
-    if (!firmaHecha) {
-        alert("Debe firmar");
-        return false;
-    }
+    if (!carro.value || !ot.value || !sintoma.value) return alert("Faltan datos"), false;
+    if (!firmaHecha) return alert("Debe firmar"), false;
     return true;
 }
 
+// ================= BASE64 =================
 function base64(file) {
     return new Promise(r => {
         const rd = new FileReader();
@@ -134,18 +157,21 @@ function base64(file) {
     });
 }
 
+// ================= GUARDAR OFFLINE =================
 async function guardarOffline(data) {
     await abrirDB();
-    const tx = db.transaction(STORE,"readwrite");
-    tx.objectStore(STORE).add(data);
+    db.transaction(STORE,"readwrite").objectStore(STORE).add(data);
+    actualizarLista();
 }
 
+// ================= ENVIAR =================
 async function enviar(data) {
     const r = await fetch(URL_SCRIPT, { method:"POST", body:JSON.stringify(data) });
     const t = await r.text();
     return t.includes("OK");
 }
 
+// ================= LOGICA PRINCIPAL =================
 async function guardarOEnviar() {
 
     if (!validar()) return;
@@ -156,11 +182,9 @@ async function guardarOEnviar() {
     }
 
     const data = {
+        idLocal: Date.now()+"_"+Math.random(),
         carro: carro.value,
         ot: ot.value,
-        fechaInicio: fechaInicio.value,
-        fechaTermino: fechaTermino.value,
-        parte: parte.value,
         sintoma: sintoma.value,
         p1: p1.value,
         p2: p2.value,
@@ -173,7 +197,6 @@ async function guardarOEnviar() {
 
     if (navigator.onLine) {
         const ok = await enviar(data);
-
         if (ok) {
             alert("Enviado");
             limpiar();
@@ -185,32 +208,61 @@ async function guardarOEnviar() {
     alert("Guardado offline");
 }
 
+// ================= SINCRONIZAR =================
 async function sincronizar() {
     await abrirDB();
 
     const tx = db.transaction(STORE,"readonly");
-    const req = tx.objectStore(STORE).getAll();
+    const datos = await new Promise(res => {
+        tx.objectStore(STORE).getAll().onsuccess = e => res(e.target.result);
+    });
 
-    req.onsuccess = async () => {
-        const datos = req.result;
-
-        for (let d of datos) {
-            const ok = await enviar(d);
-            if (ok) {
-                const t2 = db.transaction(STORE,"readwrite");
-                t2.objectStore(STORE).delete(d.id);
-            }
+    for (let d of datos) {
+        const ok = await enviar(d);
+        if (ok) {
+            db.transaction(STORE,"readwrite").objectStore(STORE).delete(d.id);
         }
+    }
 
-        alert("Sincronizado");
-    };
+    actualizarLista();
 }
 
+// ================= LISTA =================
+async function actualizarLista() {
+    await abrirDB();
+
+    const tx = db.transaction(STORE,"readonly");
+    const datos = await new Promise(res => {
+        tx.objectStore(STORE).getAll().onsuccess = e => res(e.target.result);
+    });
+
+    contadorPendientes.innerText = "Pendientes: " + datos.length;
+
+    listaPendientes.innerHTML = "";
+
+    if (datos.length === 0) {
+        listaPendientes.innerHTML = "No hay pendientes";
+        return;
+    }
+
+    datos.forEach(d => {
+        listaPendientes.innerHTML += `
+        <div class="itemPendiente">
+        Carro: ${d.carro} | OT: ${d.ot}
+        </div>`;
+    });
+}
+
+// ================= LIMPIAR =================
 function limpiar() {
     document.querySelectorAll("input,textarea").forEach(e => e.value="");
     firma.getContext("2d").clearRect(0,0,firma.width,firma.height);
     firmaHecha = false;
 }
+
+// INIT
+abrirDB().then(actualizarLista);
+
 </script>
 
 </body>
