@@ -4,38 +4,174 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Pauta Offline</title>
+<title>Pauta Offline PRO</title>
 
 <style>
-body { font-family: Arial; padding: 10px; background:#f4f6f9; }
-input, textarea, button { width:100%; margin:5px 0; padding:8px; }
+body {
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    background: #f4f6f9;
+}
 
-button { background:#2563eb; color:white; border:none; }
+h1 {
+    background: #111827;
+    color: white;
+    padding: 14px;
+    text-align: center;
+    border-radius: 6px;
+}
 
-.estado { padding:10px; margin:10px 0; background:#e5e7eb; }
+h2 {
+    background: #1e3a8a;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.card {
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+input, textarea, select, button {
+    width: 100%;
+    margin: 6px 0;
+    padding: 9px;
+    box-sizing: border-box;
+}
+
+textarea {
+    min-height: 65px;
+}
+
+button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.estado {
+    padding: 10px;
+    margin: 10px 0;
+    background: #e5e7eb;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.firmaCanvas {
+    width: 100%;
+    height: 160px;
+    border: 2px solid #1e3a8a;
+    background: white;
+    touch-action: none;
+    border-radius: 6px;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Pauta Offline</h2>
+<h1>Pauta Offline PRO</h1>
 
 <div class="estado" id="estadoConexion"></div>
+<div class="estado" id="contadorPendientes">📌 Pautas pendientes en este dispositivo: 0</div>
 
-<input id="carro" placeholder="Carro">
+<div class="card">
+<h2>Datos Generales</h2>
+<input id="carro" placeholder="N° Carro / Contenedor">
 <input id="ot" placeholder="OT">
+<input type="date" id="fechaInicio">
+<input type="date" id="fechaTermino">
+</div>
 
-<textarea id="sintoma" placeholder="Síntoma"></textarea>
+<div class="card">
+<h2>Sistema Afectado</h2>
+<select id="sistema">
+    <option value="">Seleccione sistema</option>
+    <option value="Freno">Freno</option>
+    <option value="Enganche">Enganche</option>
+    <option value="Descarga">Descarga</option>
+    <option value="Rodado">Rodado</option>
+    <option value="Estructura">Estructura</option>
+    <option value="Carga">Carga</option>
+    <option value="Residuos">Residuos</option>
+</select>
+</div>
 
-<button onclick="guardarOffline()">Guardar Offline</button>
-<button onclick="sincronizar()">Sincronizar Pendientes</button>
-<button onclick="contarPendientes()">Actualizar Pendientes</button>
+<div class="card">
+<h2>Falla Detectada</h2>
+<input id="parte" placeholder="Parte afectada">
+<textarea id="sintoma" placeholder="Síntoma detectado"></textarea>
+</div>
+
+<div class="card">
+<h2>5 Porqués</h2>
+<textarea id="p1" placeholder="¿Por qué 1?"></textarea>
+<textarea id="p2" placeholder="¿Por qué 2?"></textarea>
+<textarea id="p3" placeholder="¿Por qué 3?"></textarea>
+<textarea id="p4" placeholder="¿Por qué 4? Opcional"></textarea>
+<textarea id="p5" placeholder="¿Por qué 5? Opcional"></textarea>
+</div>
+
+<div class="card">
+<h2>Causa 6M</h2>
+<label><input type="checkbox" value="Mano de Obra"> Mano de Obra</label><br>
+<label><input type="checkbox" value="Método"> Método</label><br>
+<label><input type="checkbox" value="Material"> Material</label><br>
+<label><input type="checkbox" value="Maquinaria / Equipo"> Maquinaria / Equipo</label><br>
+<label><input type="checkbox" value="Medio Ambiente"> Medio Ambiente</label><br>
+<label><input type="checkbox" value="Operación"> Operación</label>
+</div>
+
+<div class="card">
+<h2>Justificación y Acción</h2>
+<textarea id="justificacion" placeholder="Justificación de la causa"></textarea>
+<textarea id="accion" placeholder="Acción correctiva"></textarea>
+</div>
+
+<div class="card">
+<h2>Responsables</h2>
+<input id="colaborador" placeholder="Nombre colaborador">
+
+<label>Firma Colaborador</label>
+<canvas id="firmaColaborador" class="firmaCanvas"></canvas>
+<button type="button" onclick="limpiarFirma()">Limpiar Firma</button>
+
+<input id="supervisor" placeholder="Nombre supervisor / revisor">
+</div>
+
+<div class="card">
+<h2>Observaciones</h2>
+<textarea id="observaciones" placeholder="Observaciones opcionales"></textarea>
+</div>
+
+<div class="card">
+<h2>Fotos / Evidencias</h2>
+<input type="file" id="foto" multiple accept="image/*">
+<small>Máximo 2 fotos, hasta 6 MB por foto.</small>
+</div>
+
+<button type="button" onclick="guardarOffline()">Guardar Offline</button>
+<button type="button" onclick="sincronizar()">Sincronizar Pendientes</button>
+<button type="button" onclick="contarPendientes()">Actualizar Pendientes</button>
 
 <script>
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzCP2skB2HFyNDrGu_CYbBN1KLQK8nuBDbIj7n8kp4I0qrkmjzYrHN6riyAon7BOTkTtQ/exec";
+
 const DB_NAME = "PautasOfflineDB";
 const STORE_NAME = "pendientes";
 let db;
+let firmaRealizada = false;
 
 function actualizarEstado() {
     document.getElementById("estadoConexion").innerText =
@@ -48,7 +184,7 @@ actualizarEstado();
 
 function abrirDB() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, 1);
+        const request = indexedDB.open(DB_NAME, 2);
 
         request.onupgradeneeded = function(event) {
             db = event.target.result;
@@ -68,14 +204,221 @@ function abrirDB() {
     });
 }
 
+function obtenerCausas6M() {
+    let causas = [];
+    document.querySelectorAll('input[type="checkbox"]:checked').forEach(function(el) {
+        causas.push(el.value);
+    });
+    return causas.join(", ");
+}
+
+function prepararFirma() {
+    const canvas = document.getElementById("firmaColaborador");
+    const ctx = canvas.getContext("2d");
+
+    function ajustarCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = 160;
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#000000";
+    }
+
+    ajustarCanvas();
+
+    let dibujando = false;
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const punto = e.touches ? e.touches[0] : e;
+        return {
+            x: punto.clientX - rect.left,
+            y: punto.clientY - rect.top
+        };
+    }
+
+    function iniciar(e) {
+        e.preventDefault();
+        dibujando = true;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    }
+
+    function dibujar(e) {
+        if (!dibujando) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        firmaRealizada = true;
+    }
+
+    function terminar(e) {
+        if (e) e.preventDefault();
+        dibujando = false;
+    }
+
+    canvas.addEventListener("mousedown", iniciar);
+    canvas.addEventListener("mousemove", dibujar);
+    canvas.addEventListener("mouseup", terminar);
+    canvas.addEventListener("mouseleave", terminar);
+
+    canvas.addEventListener("touchstart", iniciar, { passive: false });
+    canvas.addEventListener("touchmove", dibujar, { passive: false });
+    canvas.addEventListener("touchend", terminar, { passive: false });
+}
+
+function limpiarFirma() {
+    const canvas = document.getElementById("firmaColaborador");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    firmaRealizada = false;
+}
+
+function convertirBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+function validarFormulario() {
+    if (!document.getElementById("carro").value.trim()) {
+        alert("Debe ingresar el N° de carro");
+        return false;
+    }
+
+    if (!document.getElementById("ot").value.trim()) {
+        alert("Debe ingresar la OT");
+        return false;
+    }
+
+    if (!document.getElementById("fechaInicio").value) {
+        alert("Debe ingresar fecha de inicio");
+        return false;
+    }
+
+    if (!document.getElementById("fechaTermino").value) {
+        alert("Debe ingresar fecha de término");
+        return false;
+    }
+
+    if (!document.getElementById("sistema").value) {
+        alert("Debe seleccionar sistema");
+        return false;
+    }
+
+    if (!document.getElementById("parte").value.trim()) {
+        alert("Debe ingresar la parte afectada");
+        return false;
+    }
+
+    if (!document.getElementById("sintoma").value.trim()) {
+        alert("Debe ingresar el síntoma");
+        return false;
+    }
+
+    if (!document.getElementById("p1").value.trim()) {
+        alert("Debe ingresar ¿Por qué 1?");
+        return false;
+    }
+
+    if (!document.getElementById("p2").value.trim()) {
+        alert("Debe ingresar ¿Por qué 2?");
+        return false;
+    }
+
+    if (!document.getElementById("p3").value.trim()) {
+        alert("Debe ingresar ¿Por qué 3?");
+        return false;
+    }
+
+    if (!obtenerCausas6M()) {
+        alert("Debe seleccionar al menos una causa 6M");
+        return false;
+    }
+
+    if (!document.getElementById("justificacion").value.trim()) {
+        alert("Debe ingresar justificación de causa");
+        return false;
+    }
+
+    if (!document.getElementById("accion").value.trim()) {
+        alert("Debe ingresar acción correctiva");
+        return false;
+    }
+
+    if (!document.getElementById("colaborador").value.trim()) {
+        alert("Debe ingresar nombre del colaborador");
+        return false;
+    }
+
+    if (!firmaRealizada) {
+        alert("Debe ingresar la firma del colaborador");
+        return false;
+    }
+
+    return true;
+}
+
 async function guardarOffline() {
     await abrirDB();
+
+    const archivos = document.getElementById("foto").files;
+
+    if (archivos.length > 2) {
+        alert("Solo puedes subir máximo 2 fotos.");
+        return;
+    }
+
+    for (let i = 0; i < archivos.length; i++) {
+        if (archivos[i].size > 6000000) {
+            alert("La foto " + archivos[i].name + " pesa más de 6 MB.");
+            return;
+        }
+    }
+
+    if (!validarFormulario()) {
+        return;
+    }
+
+    let fotos = [];
+
+    for (let file of archivos) {
+        const base64 = await convertirBase64(file);
+        fotos.push({
+            nombre: file.name,
+            tipo: file.type,
+            base64: base64
+        });
+    }
 
     const data = {
         fechaLocal: new Date().toISOString(),
         carro: document.getElementById("carro").value,
         ot: document.getElementById("ot").value,
+        fechaInicio: document.getElementById("fechaInicio").value,
+        fechaTermino: document.getElementById("fechaTermino").value,
+        sistema: document.getElementById("sistema").value,
+        parte: document.getElementById("parte").value,
         sintoma: document.getElementById("sintoma").value,
+        p1: document.getElementById("p1").value,
+        p2: document.getElementById("p2").value,
+        p3: document.getElementById("p3").value,
+        p4: document.getElementById("p4").value,
+        p5: document.getElementById("p5").value,
+        causas6m: obtenerCausas6M(),
+        justificacion: document.getElementById("justificacion").value,
+        accion: document.getElementById("accion").value,
+        colaborador: document.getElementById("colaborador").value,
+        supervisor: document.getElementById("supervisor").value,
+        firmaColaborador: document.getElementById("firmaColaborador").toDataURL("image/png"),
+        observaciones: document.getElementById("observaciones").value,
+        fotos: fotos,
         estado: "PENDIENTE"
     };
 
@@ -84,12 +427,13 @@ async function guardarOffline() {
     store.add(data);
 
     tx.oncomplete = function() {
-        alert("Pauta guardada offline en IndexedDB");
+        alert("Pauta guardada offline correctamente");
         contarPendientes();
+        limpiarFormulario();
     };
 
     tx.onerror = function() {
-        alert("Error al guardar offline");
+        alert("Error al guardar la pauta offline");
     };
 }
 
@@ -131,17 +475,8 @@ async function eliminarPendiente(id) {
 
 async function contarPendientes() {
     const pendientes = await obtenerPendientes();
-
-    let aviso = document.getElementById("contadorPendientes");
-
-    if (!aviso) {
-        aviso = document.createElement("div");
-        aviso.id = "contadorPendientes";
-        aviso.className = "estado";
-        document.body.insertBefore(aviso, document.body.children[2]);
-    }
-
-    aviso.innerText = "📌 Pautas pendientes en este dispositivo: " + pendientes.length;
+    document.getElementById("contadorPendientes").innerText =
+        "📌 Pautas pendientes en este dispositivo: " + pendientes.length;
 }
 
 async function sincronizar() {
@@ -158,16 +493,9 @@ async function sincronizar() {
     }
 
     for (const pauta of pendientes) {
-        const dataEnviar = {
-            carro: pauta.carro,
-            ot: pauta.ot,
-            sintoma: pauta.sintoma,
-            observaciones: "Sincronizada desde modo offline. Fecha local: " + pauta.fechaLocal
-        };
-
         const respuesta = await fetch(URL_SCRIPT, {
             method: "POST",
-            body: JSON.stringify(dataEnviar)
+            body: JSON.stringify(pauta)
         });
 
         const texto = await respuesta.text();
@@ -184,7 +512,38 @@ async function sincronizar() {
     alert("Sincronización finalizada");
 }
 
-abrirDB().then(contarPendientes);
+function limpiarFormulario() {
+    document.getElementById("carro").value = "";
+    document.getElementById("ot").value = "";
+    document.getElementById("fechaInicio").value = "";
+    document.getElementById("fechaTermino").value = "";
+    document.getElementById("sistema").value = "";
+    document.getElementById("parte").value = "";
+    document.getElementById("sintoma").value = "";
+    document.getElementById("p1").value = "";
+    document.getElementById("p2").value = "";
+    document.getElementById("p3").value = "";
+    document.getElementById("p4").value = "";
+    document.getElementById("p5").value = "";
+    document.getElementById("justificacion").value = "";
+    document.getElementById("accion").value = "";
+    document.getElementById("colaborador").value = "";
+    document.getElementById("supervisor").value = "";
+    document.getElementById("observaciones").value = "";
+    document.getElementById("foto").value = "";
+
+    document.querySelectorAll('input[type="checkbox"]').forEach(function(el) {
+        el.checked = false;
+    });
+
+    limpiarFirma();
+}
+
+window.addEventListener("load", function() {
+    abrirDB().then(contarPendientes);
+    prepararFirma();
+    actualizarEstado();
+});
 </script>
 
 </body>
