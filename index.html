@@ -29,10 +29,13 @@ button { background:#2563eb; color:white; border:none; }
 
 <button onclick="guardarOffline()">Guardar Offline</button>
 <button onclick="sincronizar()">Sincronizar Pendientes</button>
+<button onclick="contarPendientes()">Actualizar Pendientes</button>
 
 <script>
-
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzCP2skB2HFyNDrGu_CYbBN1KLQK8nuBDbIj7n8kp4I0qrkmjzYrHN6riyAon7BOTkTtQ/exec";
+const DB_NAME = "PautasOfflineDB";
+const STORE_NAME = "pendientes";
+let db;
 
 function actualizarEstado() {
     document.getElementById("estadoConexion").innerText =
@@ -43,53 +46,145 @@ window.addEventListener("online", actualizarEstado);
 window.addEventListener("offline", actualizarEstado);
 actualizarEstado();
 
-function guardarOffline() {
+function abrirDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+
+        request.onupgradeneeded = function(event) {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
+            }
+        };
+
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            resolve(db);
+        };
+
+        request.onerror = function() {
+            reject("Error al abrir IndexedDB");
+        };
+    });
+}
+
+async function guardarOffline() {
+    await abrirDB();
 
     const data = {
+        fechaLocal: new Date().toISOString(),
         carro: document.getElementById("carro").value,
         ot: document.getElementById("ot").value,
-        sintoma: document.getElementById("sintoma").value
+        sintoma: document.getElementById("sintoma").value,
+        estado: "PENDIENTE"
     };
 
-    let pendientes = JSON.parse(localStorage.getItem("pendientes") || "[]");
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    store.add(data);
 
-    pendientes.push(data);
+    tx.oncomplete = function() {
+        alert("Pauta guardada offline en IndexedDB");
+        contarPendientes();
+    };
 
-    localStorage.setItem("pendientes", JSON.stringify(pendientes));
+    tx.onerror = function() {
+        alert("Error al guardar offline");
+    };
+}
 
-    alert("Pauta guardada offline");
+async function obtenerPendientes() {
+    await abrirDB();
 
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readonly");
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.getAll();
+
+        request.onsuccess = function() {
+            resolve(request.result);
+        };
+
+        request.onerror = function() {
+            reject("Error al leer pendientes");
+        };
+    });
+}
+
+async function eliminarPendiente(id) {
+    await abrirDB();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.delete(id);
+
+        request.onsuccess = function() {
+            resolve();
+        };
+
+        request.onerror = function() {
+            reject("Error al eliminar pendiente");
+        };
+    });
+}
+
+async function contarPendientes() {
+    const pendientes = await obtenerPendientes();
+
+    let aviso = document.getElementById("contadorPendientes");
+
+    if (!aviso) {
+        aviso = document.createElement("div");
+        aviso.id = "contadorPendientes";
+        aviso.className = "estado";
+        document.body.insertBefore(aviso, document.body.children[2]);
+    }
+
+    aviso.innerText = "📌 Pautas pendientes en este dispositivo: " + pendientes.length;
 }
 
 async function sincronizar() {
-
     if (!navigator.onLine) {
-        alert("No hay internet");
+        alert("No hay internet. No se puede sincronizar.");
         return;
     }
 
-    let pendientes = JSON.parse(localStorage.getItem("pendientes") || "[]");
+    const pendientes = await obtenerPendientes();
 
     if (pendientes.length === 0) {
-        alert("No hay pendientes");
+        alert("No hay pautas pendientes");
         return;
     }
 
-    for (let p of pendientes) {
+    for (const pauta of pendientes) {
+        const dataEnviar = {
+            carro: pauta.carro,
+            ot: pauta.ot,
+            sintoma: pauta.sintoma,
+            observaciones: "Sincronizada desde modo offline. Fecha local: " + pauta.fechaLocal
+        };
 
-        await fetch(URL_SCRIPT, {
+        const respuesta = await fetch(URL_SCRIPT, {
             method: "POST",
-            body: JSON.stringify(p)
+            body: JSON.stringify(dataEnviar)
         });
 
+        const texto = await respuesta.text();
+
+        if (texto.includes("OK")) {
+            await eliminarPendiente(pauta.id);
+        } else {
+            alert("Error al sincronizar pauta ID " + pauta.id + ": " + texto);
+            break;
+        }
     }
 
-    localStorage.removeItem("pendientes");
-
-    alert("Sincronización completa");
-
+    await contarPendientes();
+    alert("Sincronización finalizada");
 }
 
+abrirDB().then(contarPendientes);
 </script>
 
 </body>
