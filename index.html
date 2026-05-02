@@ -3,79 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Pauta Offline PRO</title>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    padding: 10px;
-    background: #f4f6f9;
-}
-
-h1 {
-    background: #111827;
-    color: white;
-    padding: 14px;
-    text-align: center;
-    border-radius: 6px;
-}
-
-h2 {
-    background: #1e3a8a;
-    color: white;
-    padding: 10px;
-    border-radius: 6px;
-}
-
-.card {
-    background: white;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-}
-
-input, textarea, select, button {
-    width: 100%;
-    margin: 6px 0;
-    padding: 9px;
-    box-sizing: border-box;
-}
-
-textarea {
-    min-height: 65px;
-}
-
-button {
-    background: #2563eb;
-    color: white;
-    border: none;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 6px;
-}
-
-button:hover {
-    background: #1d4ed8;
-}
-
-.estado {
-    padding: 10px;
-    margin: 10px 0;
-    background: #e5e7eb;
-    border-radius: 6px;
-    font-weight: bold;
-}
-
-.firmaCanvas {
-    width: 100%;
-    height: 160px;
-    border: 2px solid #1e3a8a;
-    background: white;
-    touch-action: none;
-    border-radius: 6px;
-}
+body { font-family: Arial; padding:10px; background:#f4f6f9; }
+h1 { background:#111827; color:white; padding:12px; text-align:center; }
+h2 { background:#1e3a8a; color:white; padding:8px; }
+.card { background:white; padding:10px; margin-bottom:10px; border-radius:6px; }
+input, textarea, select, button { width:100%; margin:5px 0; padding:8px; }
+button { background:#2563eb; color:white; border:none; font-weight:bold; }
+.estado { padding:8px; background:#e5e7eb; margin:5px 0; }
+canvas { border:2px solid #1e3a8a; width:100%; height:140px; }
 </style>
 </head>
 
@@ -84,466 +22,195 @@ button:hover {
 <h1>Pauta Offline PRO</h1>
 
 <div class="estado" id="estadoConexion"></div>
-<div class="estado" id="contadorPendientes">📌 Pautas pendientes en este dispositivo: 0</div>
+<div class="estado" id="contadorPendientes"></div>
 
 <div class="card">
-<h2>Datos Generales</h2>
-<input id="carro" placeholder="N° Carro / Contenedor">
+<h2>Datos</h2>
+<input id="carro" placeholder="Carro">
 <input id="ot" placeholder="OT">
 <input type="date" id="fechaInicio">
 <input type="date" id="fechaTermino">
 </div>
 
 <div class="card">
-<h2>Sistema Afectado</h2>
-<select id="sistema">
-    <option value="">Seleccione sistema</option>
-    <option value="Freno">Freno</option>
-    <option value="Enganche">Enganche</option>
-    <option value="Descarga">Descarga</option>
-    <option value="Rodado">Rodado</option>
-    <option value="Estructura">Estructura</option>
-    <option value="Carga">Carga</option>
-    <option value="Residuos">Residuos</option>
-</select>
-</div>
-
-<div class="card">
-<h2>Falla Detectada</h2>
-<input id="parte" placeholder="Parte afectada">
-<textarea id="sintoma" placeholder="Síntoma detectado"></textarea>
+<h2>Falla</h2>
+<input id="parte" placeholder="Parte">
+<textarea id="sintoma" placeholder="Síntoma"></textarea>
 </div>
 
 <div class="card">
 <h2>5 Porqués</h2>
-<textarea id="p1" placeholder="¿Por qué 1?"></textarea>
-<textarea id="p2" placeholder="¿Por qué 2?"></textarea>
-<textarea id="p3" placeholder="¿Por qué 3?"></textarea>
-<textarea id="p4" placeholder="¿Por qué 4? Opcional"></textarea>
-<textarea id="p5" placeholder="¿Por qué 5? Opcional"></textarea>
+<textarea id="p1"></textarea>
+<textarea id="p2"></textarea>
+<textarea id="p3"></textarea>
 </div>
 
 <div class="card">
-<h2>Causa 6M</h2>
-<label><input type="checkbox" value="Mano de Obra"> Mano de Obra</label><br>
-<label><input type="checkbox" value="Método"> Método</label><br>
-<label><input type="checkbox" value="Material"> Material</label><br>
-<label><input type="checkbox" value="Maquinaria / Equipo"> Maquinaria / Equipo</label><br>
-<label><input type="checkbox" value="Medio Ambiente"> Medio Ambiente</label><br>
-<label><input type="checkbox" value="Operación"> Operación</label>
+<h2>Acción</h2>
+<textarea id="accion"></textarea>
 </div>
 
 <div class="card">
-<h2>Justificación y Acción</h2>
-<textarea id="justificacion" placeholder="Justificación de la causa"></textarea>
-<textarea id="accion" placeholder="Acción correctiva"></textarea>
+<h2>Responsable</h2>
+<input id="colaborador" placeholder="Nombre">
+<canvas id="firma"></canvas>
 </div>
 
 <div class="card">
-<h2>Responsables</h2>
-<input id="colaborador" placeholder="Nombre colaborador">
-
-<label>Firma Colaborador</label>
-<canvas id="firmaColaborador" class="firmaCanvas"></canvas>
-<button type="button" onclick="limpiarFirma()">Limpiar Firma</button>
-
-<input id="supervisor" placeholder="Nombre supervisor / revisor">
+<input type="file" id="foto" multiple>
 </div>
 
-<div class="card">
-<h2>Observaciones</h2>
-<textarea id="observaciones" placeholder="Observaciones opcionales"></textarea>
-</div>
-
-<div class="card">
-<h2>Fotos / Evidencias</h2>
-<input type="file" id="foto" multiple accept="image/*">
-<small>Máximo 2 fotos, hasta 6 MB por foto.</small>
-</div>
-
-<button type="button" onclick="guardarOffline()">Guardar Offline</button>
-<button type="button" onclick="sincronizar()">Sincronizar Pendientes</button>
-<button type="button" onclick="contarPendientes()">Actualizar Pendientes</button>
+<button onclick="guardarOEnviar()">Guardar / Enviar</button>
+<button onclick="sincronizar()">Sincronizar</button>
 
 <script>
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzCP2skB2HFyNDrGu_CYbBN1KLQK8nuBDbIj7n8kp4I0qrkmjzYrHN6riyAon7BOTkTtQ/exec";
+const DB_NAME = "DB";
+const STORE = "pendientes";
 
-const DB_NAME = "PautasOfflineDB";
-const STORE_NAME = "pendientes";
 let db;
-let firmaRealizada = false;
+let firmaHecha = false;
 
-function actualizarEstado() {
+function estado() {
     document.getElementById("estadoConexion").innerText =
-        navigator.onLine ? "🟢 Con conexión" : "🔴 Sin conexión";
+        navigator.onLine ? "🟢 Online" : "🔴 Offline";
 }
-
-window.addEventListener("online", actualizarEstado);
-window.addEventListener("offline", actualizarEstado);
-actualizarEstado();
+window.addEventListener("online", estado);
+window.addEventListener("offline", estado);
+estado();
 
 function abrirDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, 2);
+    return new Promise((res, rej) => {
+        const req = indexedDB.open(DB_NAME, 1);
 
-        request.onupgradeneeded = function(event) {
-            db = event.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
-            }
+        req.onupgradeneeded = e => {
+            db = e.target.result;
+            db.createObjectStore(STORE, { keyPath:"id", autoIncrement:true });
         };
 
-        request.onsuccess = function(event) {
-            db = event.target.result;
-            resolve(db);
-        };
-
-        request.onerror = function() {
-            reject("Error al abrir IndexedDB");
-        };
+        req.onsuccess = e => { db = e.target.result; res(); };
+        req.onerror = () => rej();
     });
-}
-
-function obtenerCausas6M() {
-    let causas = [];
-    document.querySelectorAll('input[type="checkbox"]:checked').forEach(function(el) {
-        causas.push(el.value);
-    });
-    return causas.join(", ");
 }
 
 function prepararFirma() {
-    const canvas = document.getElementById("firmaColaborador");
+    const canvas = document.getElementById("firma");
     const ctx = canvas.getContext("2d");
 
-    function ajustarCanvas() {
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = 160;
-        ctx.lineWidth = 2;
-        ctx.lineCap = "round";
-        ctx.strokeStyle = "#000000";
-    }
+    canvas.width = canvas.offsetWidth;
+    canvas.height = 140;
 
-    ajustarCanvas();
+    let dib = false;
 
-    let dibujando = false;
+    canvas.onmousedown = () => dib = true;
+    canvas.onmouseup = () => dib = false;
 
-    function getPos(e) {
-        const rect = canvas.getBoundingClientRect();
-        const punto = e.touches ? e.touches[0] : e;
-        return {
-            x: punto.clientX - rect.left,
-            y: punto.clientY - rect.top
-        };
-    }
-
-    function iniciar(e) {
-        e.preventDefault();
-        dibujando = true;
-        const pos = getPos(e);
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-    }
-
-    function dibujar(e) {
-        if (!dibujando) return;
-        e.preventDefault();
-        const pos = getPos(e);
-        ctx.lineTo(pos.x, pos.y);
+    canvas.onmousemove = e => {
+        if (!dib) return;
+        ctx.lineTo(e.offsetX, e.offsetY);
         ctx.stroke();
-        firmaRealizada = true;
-    }
-
-    function terminar(e) {
-        if (e) e.preventDefault();
-        dibujando = false;
-    }
-
-    canvas.addEventListener("mousedown", iniciar);
-    canvas.addEventListener("mousemove", dibujar);
-    canvas.addEventListener("mouseup", terminar);
-    canvas.addEventListener("mouseleave", terminar);
-
-    canvas.addEventListener("touchstart", iniciar, { passive: false });
-    canvas.addEventListener("touchmove", dibujar, { passive: false });
-    canvas.addEventListener("touchend", terminar, { passive: false });
+        firmaHecha = true;
+    };
 }
+window.onload = prepararFirma;
 
-function limpiarFirma() {
-    const canvas = document.getElementById("firmaColaborador");
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    firmaRealizada = false;
-}
-
-function convertirBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(",")[1]);
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-    });
-}
-
-function validarFormulario() {
-    if (!document.getElementById("carro").value.trim()) {
-        alert("Debe ingresar el N° de carro");
+function validar() {
+    if (!carro.value || !ot.value || !sintoma.value || !p1.value || !p2.value || !p3.value) {
+        alert("Faltan datos");
         return false;
     }
-
-    if (!document.getElementById("ot").value.trim()) {
-        alert("Debe ingresar la OT");
+    if (!firmaHecha) {
+        alert("Debe firmar");
         return false;
     }
-
-    if (!document.getElementById("fechaInicio").value) {
-        alert("Debe ingresar fecha de inicio");
-        return false;
-    }
-
-    if (!document.getElementById("fechaTermino").value) {
-        alert("Debe ingresar fecha de término");
-        return false;
-    }
-
-    if (!document.getElementById("sistema").value) {
-        alert("Debe seleccionar sistema");
-        return false;
-    }
-
-    if (!document.getElementById("parte").value.trim()) {
-        alert("Debe ingresar la parte afectada");
-        return false;
-    }
-
-    if (!document.getElementById("sintoma").value.trim()) {
-        alert("Debe ingresar el síntoma");
-        return false;
-    }
-
-    if (!document.getElementById("p1").value.trim()) {
-        alert("Debe ingresar ¿Por qué 1?");
-        return false;
-    }
-
-    if (!document.getElementById("p2").value.trim()) {
-        alert("Debe ingresar ¿Por qué 2?");
-        return false;
-    }
-
-    if (!document.getElementById("p3").value.trim()) {
-        alert("Debe ingresar ¿Por qué 3?");
-        return false;
-    }
-
-    if (!obtenerCausas6M()) {
-        alert("Debe seleccionar al menos una causa 6M");
-        return false;
-    }
-
-    if (!document.getElementById("justificacion").value.trim()) {
-        alert("Debe ingresar justificación de causa");
-        return false;
-    }
-
-    if (!document.getElementById("accion").value.trim()) {
-        alert("Debe ingresar acción correctiva");
-        return false;
-    }
-
-    if (!document.getElementById("colaborador").value.trim()) {
-        alert("Debe ingresar nombre del colaborador");
-        return false;
-    }
-
-    if (!firmaRealizada) {
-        alert("Debe ingresar la firma del colaborador");
-        return false;
-    }
-
     return true;
 }
 
-async function guardarOffline() {
+function base64(file) {
+    return new Promise(r => {
+        const rd = new FileReader();
+        rd.onload = () => r(rd.result.split(",")[1]);
+        rd.readAsDataURL(file);
+    });
+}
+
+async function guardarOffline(data) {
     await abrirDB();
+    const tx = db.transaction(STORE,"readwrite");
+    tx.objectStore(STORE).add(data);
+}
 
-    const archivos = document.getElementById("foto").files;
+async function enviar(data) {
+    const r = await fetch(URL_SCRIPT, { method:"POST", body:JSON.stringify(data) });
+    const t = await r.text();
+    return t.includes("OK");
+}
 
-    if (archivos.length > 2) {
-        alert("Solo puedes subir máximo 2 fotos.");
-        return;
+async function guardarOEnviar() {
+
+    if (!validar()) return;
+
+    let fotos = [];
+    for (let f of foto.files) {
+        fotos.push({ nombre:f.name, tipo:f.type, base64:await base64(f) });
     }
 
-    for (let i = 0; i < archivos.length; i++) {
-        if (archivos[i].size > 6000000) {
-            alert("La foto " + archivos[i].name + " pesa más de 6 MB.");
+    const data = {
+        carro: carro.value,
+        ot: ot.value,
+        fechaInicio: fechaInicio.value,
+        fechaTermino: fechaTermino.value,
+        parte: parte.value,
+        sintoma: sintoma.value,
+        p1: p1.value,
+        p2: p2.value,
+        p3: p3.value,
+        accion: accion.value,
+        colaborador: colaborador.value,
+        firmaColaborador: firma.toDataURL(),
+        fotos: fotos
+    };
+
+    if (navigator.onLine) {
+        const ok = await enviar(data);
+
+        if (ok) {
+            alert("Enviado");
+            limpiar();
             return;
         }
     }
 
-    if (!validarFormulario()) {
-        return;
-    }
-
-    let fotos = [];
-
-    for (let file of archivos) {
-        const base64 = await convertirBase64(file);
-        fotos.push({
-            nombre: file.name,
-            tipo: file.type,
-            base64: base64
-        });
-    }
-
-    const data = {
-        fechaLocal: new Date().toISOString(),
-        carro: document.getElementById("carro").value,
-        ot: document.getElementById("ot").value,
-        fechaInicio: document.getElementById("fechaInicio").value,
-        fechaTermino: document.getElementById("fechaTermino").value,
-        sistema: document.getElementById("sistema").value,
-        parte: document.getElementById("parte").value,
-        sintoma: document.getElementById("sintoma").value,
-        p1: document.getElementById("p1").value,
-        p2: document.getElementById("p2").value,
-        p3: document.getElementById("p3").value,
-        p4: document.getElementById("p4").value,
-        p5: document.getElementById("p5").value,
-        causas6m: obtenerCausas6M(),
-        justificacion: document.getElementById("justificacion").value,
-        accion: document.getElementById("accion").value,
-        colaborador: document.getElementById("colaborador").value,
-        supervisor: document.getElementById("supervisor").value,
-        firmaColaborador: document.getElementById("firmaColaborador").toDataURL("image/png"),
-        observaciones: document.getElementById("observaciones").value,
-        fotos: fotos,
-        estado: "PENDIENTE"
-    };
-
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    store.add(data);
-
-    tx.oncomplete = function() {
-        alert("Pauta guardada offline correctamente");
-        contarPendientes();
-        limpiarFormulario();
-    };
-
-    tx.onerror = function() {
-        alert("Error al guardar la pauta offline");
-    };
-}
-
-async function obtenerPendientes() {
-    await abrirDB();
-
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, "readonly");
-        const store = tx.objectStore(STORE_NAME);
-        const request = store.getAll();
-
-        request.onsuccess = function() {
-            resolve(request.result);
-        };
-
-        request.onerror = function() {
-            reject("Error al leer pendientes");
-        };
-    });
-}
-
-async function eliminarPendiente(id) {
-    await abrirDB();
-
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, "readwrite");
-        const store = tx.objectStore(STORE_NAME);
-        const request = store.delete(id);
-
-        request.onsuccess = function() {
-            resolve();
-        };
-
-        request.onerror = function() {
-            reject("Error al eliminar pendiente");
-        };
-    });
-}
-
-async function contarPendientes() {
-    const pendientes = await obtenerPendientes();
-    document.getElementById("contadorPendientes").innerText =
-        "📌 Pautas pendientes en este dispositivo: " + pendientes.length;
+    await guardarOffline(data);
+    alert("Guardado offline");
 }
 
 async function sincronizar() {
-    if (!navigator.onLine) {
-        alert("No hay internet. No se puede sincronizar.");
-        return;
-    }
+    await abrirDB();
 
-    const pendientes = await obtenerPendientes();
+    const tx = db.transaction(STORE,"readonly");
+    const req = tx.objectStore(STORE).getAll();
 
-    if (pendientes.length === 0) {
-        alert("No hay pautas pendientes");
-        return;
-    }
+    req.onsuccess = async () => {
+        const datos = req.result;
 
-    for (const pauta of pendientes) {
-        const respuesta = await fetch(URL_SCRIPT, {
-            method: "POST",
-            body: JSON.stringify(pauta)
-        });
-
-        const texto = await respuesta.text();
-
-        if (texto.includes("OK")) {
-            await eliminarPendiente(pauta.id);
-        } else {
-            alert("Error al sincronizar pauta ID " + pauta.id + ": " + texto);
-            break;
+        for (let d of datos) {
+            const ok = await enviar(d);
+            if (ok) {
+                const t2 = db.transaction(STORE,"readwrite");
+                t2.objectStore(STORE).delete(d.id);
+            }
         }
-    }
 
-    await contarPendientes();
-    alert("Sincronización finalizada");
+        alert("Sincronizado");
+    };
 }
 
-function limpiarFormulario() {
-    document.getElementById("carro").value = "";
-    document.getElementById("ot").value = "";
-    document.getElementById("fechaInicio").value = "";
-    document.getElementById("fechaTermino").value = "";
-    document.getElementById("sistema").value = "";
-    document.getElementById("parte").value = "";
-    document.getElementById("sintoma").value = "";
-    document.getElementById("p1").value = "";
-    document.getElementById("p2").value = "";
-    document.getElementById("p3").value = "";
-    document.getElementById("p4").value = "";
-    document.getElementById("p5").value = "";
-    document.getElementById("justificacion").value = "";
-    document.getElementById("accion").value = "";
-    document.getElementById("colaborador").value = "";
-    document.getElementById("supervisor").value = "";
-    document.getElementById("observaciones").value = "";
-    document.getElementById("foto").value = "";
-
-    document.querySelectorAll('input[type="checkbox"]').forEach(function(el) {
-        el.checked = false;
-    });
-
-    limpiarFirma();
+function limpiar() {
+    document.querySelectorAll("input,textarea").forEach(e => e.value="");
+    firma.getContext("2d").clearRect(0,0,firma.width,firma.height);
+    firmaHecha = false;
 }
-
-window.addEventListener("load", function() {
-    abrirDB().then(contarPendientes);
-    prepararFirma();
-    actualizarEstado();
-});
 </script>
 
 </body>
